@@ -19,7 +19,7 @@
     height: :150px;
 }
 
-#number-frame .number{
+#number-frame .number, #answer-frame .number{
     display: inline-block;;
     margin: 0.5em;
     background-color: #bbb;
@@ -30,10 +30,12 @@
     cursor: pointer;
 }
 
-#number-frame .number.selected{
-    color:red;
+#number-frame .number.select-true{
+    color: lightgray;
+    backgroun: gray;
 }
 
 #number-frame .number:hover{
-    background-color: blue;
+    background-color: orange;
+    color: white;
 }
