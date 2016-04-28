@@ -32,10 +32,28 @@
 
 #number-frame .number.select-true{
     color: lightgray;
-    backgroun: gray;
+    background-color: gray;
 }
 
 #number-frame .number:hover{
     background-color: orange;
     color: white;
+}
+
+#number-frame .number.select-true.number-used{
+    cursor: not-allowed;
+    background-color: green;
+}
+
+#number-frame .number.number-used:hover{
+    color: lightgray;
+    background-color: green;
+}
+
+#button-frame .btn-correct{
+    background-color: green;
+}
+
+#button-frame .btn-incorrect{
+    background-color: red;
 }
