@@ -1,0 +1,72 @@
+#stars-frame .glyphicon{
+    margin: 0.3em;
+    font: 1.75em;
+}
+
+#stars-frame, #answer-frame{
+    width: 40%;
+    float:left;
+}
+
+#button-frame{
+    width: 20%;
+    float: left;
+    text-align: center;
+    max-resolution: 50px;
+}
+
+#stars-frame .well, #answer-frame .well, #message-frame .well{
+    height: :150px;
+}
+
+#message-frame {
+    text-align: center;
+}
+
+#number-frame .number, #answer-frame .number{
+    display: inline-block;;
+    margin: 0.5em;
+    background-color: #bbb;
+    width: 30px;
+    text-align: center;;
+    font-size: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#number-frame .number.select-true{
+    color: lightgray;
+    background-color: gray;
+}
+
+#number-frame .number:hover{
+    background-color: orange;
+    color: white;
+}
+
+#number-frame .number.number-used{
+    cursor: not-allowed;
+    background-color: gray;
+    color: green;
+}
+
+#button-frame button{
+    margin-bottom: 10px;
+}
+
+#button-frame .btn-correct{
+    background-color: green;
+}
+
+#button-frame .btn-incorrect{
+    background-color: red;
+}
+
+.disabled {
+    cursor: not-allowed;
+    background-color: gray;
+}
+
+.hidden{
+    display: none;
+}

@@ -37,7 +37,6 @@ var Form = React.createClass({
     }
 });
 
-
 var Main = React.createClass({
     getInitialState: function(){
         var loginArray = [];
