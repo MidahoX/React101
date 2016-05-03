@@ -15,8 +15,12 @@
     max-resolution: 50px;
 }
 
-#stars-frame .well, #answer-frame .well{
+#stars-frame .well, #answer-frame .well, #message-frame .well{
     height: :150px;
+}
+
+#message-frame {
+    text-align: center;
 }
 
 #number-frame .number, #answer-frame .number{
@@ -40,14 +44,14 @@
     color: white;
 }
 
-#number-frame .number.select-true.number-used{
+#number-frame .number.number-used{
     cursor: not-allowed;
-    background-color: green;
+    background-color: gray;
+    color: green;
 }
 
-#number-frame .number.number-used:hover{
-    color: lightgray;
-    background-color: green;
+#button-frame button{
+    margin-bottom: 10px;
 }
 
 #button-frame .btn-correct{
@@ -56,4 +60,13 @@
 
 #button-frame .btn-incorrect{
     background-color: red;
+}
+
+.disabled {
+    cursor: not-allowed;
+    background-color: gray;
+}
+
+.hidden{
+    display: none;
 }

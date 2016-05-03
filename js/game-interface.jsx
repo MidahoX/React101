@@ -22,12 +22,8 @@ var AnswerFrame = React.createClass({
 });
 
 var StarsFrame = React.createClass({
-    getInitialState: function(){
-        // return the star value from Game component
-        return {starNum: this.props.numberOfStars};
-    },
     render:function(){
-        var numberOfStars = this.state.starNum;
+        var numberOfStars = this.props.numberOfStars;
         var stars = [];
         for(var i = 0; i < numberOfStars; i++)
         {
@@ -51,16 +47,53 @@ var ButtonFrame = React.createClass({
         var checkResultClick = this.props.checkResultClick;
         var className = "btn btn-primary btn-lg";
         var status = this.props.status;
+        var spanIcon =[];
         if(disabled == "")
         {
             if(status != null )
             {
                 className += (status ?" btn-correct":" btn-incorrect");
+                if(status)
+                {
+                    // if this is the correct answer, the second time click will trigger redraw
+                    checkResultClick = this.props.redrawClick;
+                    spanIcon.push(
+                        <span className="glyphicon glyphicon-ok"></span>
+                    );
+                }
+                else{
+                    spanIcon.push(
+                        <span className="glyphicon glyphicon-remove"></span>
+                    );
+                }
             }
         }
+        if(spanIcon.length == 0)
+        {
+            spanIcon.push(
+                <span>=</span>
+            );
+        }
+        var reRollClick;
+        var reRollNumber = this.props.reRollNumber;
+        var reRollClass = "btn btn-warning btn-xs "
+        if(reRollNumber == 0)
+        {
+            reRollClass += " disabled";
+        }
+        else {
+             reRollClick = this.props.reRollClick
+        }
+
         return (
             <div id="button-frame">
-                <button className={className} disabled={disabled} onClick={checkResultClick} >=</button>
+                <button className={className} disabled={disabled} onClick={checkResultClick} >
+                    {spanIcon}
+                </button>
+                <br/>
+                <button className={reRollClass} onClick={reRollClick}>
+                    <span className="glyphicon glyphicon-refresh">{reRollNumber}</span>
+                </button>
             </div>
         );
     }
@@ -86,11 +119,19 @@ var NumberFrame = React.createClass({
 
         for(var i = 1; i<=9 ;i++){
             var classAttrs = 'number select-' + ((selectedNumbersArray.indexOf(i) > -1) ? "true" : "false");
-            classAttrs += (usedNumbers.indexOf(i) > -1 ? " number-used": "");
-
-            numbers.push(
-                <div className={classAttrs} onClick={clickNumFunc.bind(null,i)} >{i}</div>
-            );
+            if(usedNumbers.indexOf(i) > -1 )
+            {
+                classAttrs +=  " number-used";
+                numbers.push(
+                    <div className={classAttrs} >{i}</div>
+                );
+            }
+            else
+            {
+                numbers.push(
+                    <div className={classAttrs} onClick={clickNumFunc.bind(null,i)} >{i}</div>
+                );
+            }
         }
         return (
             <div id="number-frame">
@@ -102,21 +143,122 @@ var NumberFrame = React.createClass({
     }
 });
 
+var MessageFrame = React.createClass({
+    render: function(){
+        var winState = this.props.winState;
+        var className = "well";
+        var classPlayAgainBtn = "";
+        var message = [];
+        var resetClick = this.props.resetClick;
+        switch (winState) {
+            case true:
+                message.push("You won!");
+                break;
+            case false:
+                message.push(
+                    <span>No possible answers! You lost.</span>
+                );
+                break;
+            default:
+                message.push("");
+                className += " hidden";
+                classPlayAgainBtn = "hidden"
+                break;
+        }
+        return(
+            <div id="message-frame" className={className}>
+                <h2>{message}</h2>
+                <button onClick={resetClick} className={classPlayAgainBtn}> Play Again? </button>
+            </div>
+        );
+    }
+});
+
 var Game = React.createClass({
     getRandomValue: function (){
         return Math.floor( Math.random() * 9) + 1;
     },
+    checkPossibleValue: function(newValue, usedNumbers){
+        // check if the current results can produce the numberOfStars;
+        var numberOfStars = newValue;
+        var usedNumbers = usedNumbers;
+        var isAnswerExisted = false;
+
+        // loop through all the value
+        // For each value, calculate the difference between number of stars and the value
+        // If the remainder is not in the usedNumbers list, then the answer is available.
+        for(var i = 1; i <= 9; i++)
+        {
+            var diff = numberOfStars - i;
+            if( diff < 0)
+            {
+                break;
+            }
+
+            if(diff == 0 && usedNumbers.indexOf(i) < 0)
+            {
+                isAnswerExisted = true;
+                break;
+            }
+
+            if(diff > 0 && usedNumbers.indexOf(i) < 0 && usedNumbers.indexOf(diff) < 0)
+            {
+                isAnswerExisted = true;
+                break;
+            }
+        }
+        return isAnswerExisted;
+    },
     getInitialState: function(){
+        var newNumberOfStars = this.getRandomValue();
         return {
-                numberOfStars: this.getRandomValue(),
+                numberOfStars: newNumberOfStars,
                 selectedNumbers : [],
                 usedNumbers : [],
-                correct: null
+                correct: null,
+                win: null,
+                reRoll: 5
             };
     },
+    resetClick: function(){
+        var newNumberOfStars = this.getRandomValue();
+        this.setState({
+                numberOfStars: newNumberOfStars,
+                selectedNumbers : [],
+                usedNumbers : [],
+                correct: null,
+                win: null,
+                reRoll: 5
+            });
+    },
     redraw: function(){
-        this.replaceState({
 
+        // redraw the app when the answer is correct
+        var newNumberOfStars = this.getRandomValue();
+        var usedNumbers = this.state.usedNumbers;
+        var winState = null;
+        // if the usedNumbers length is 9 -> finish and win the game
+        if(this.state.usedNumbers.length == 9)
+            winState = true;
+        else {
+            // check if possible exist. if exist let the game continue
+            var isAnswerExisted = this.checkPossibleValue(newNumberOfStars, usedNumbers);
+
+            // Test function for checkPossibleValue
+            //var isAnswerExisted = this.checkPossibleValue(9, [2,3,4,5,6,7,8,9]);
+
+            // If reRoll is still positive, users can reRoll
+            if(this.state.reRoll > 0)
+                winState = null;
+            else
+                winState = (isAnswerExisted ? null : false);
+        }
+
+        this.setState({
+                numberOfStars : newNumberOfStars,
+                selectedNumbers : [],
+                correct: null,
+                win: winState
         });
     },
     selectNumber : function(value){
@@ -145,6 +287,24 @@ var Game = React.createClass({
             );
         }
     },
+    reRollClick: function(){
+        var reRoll = this.state.reRoll - 1;
+        var newNumberOfStars = this.getRandomValue();
+
+        // after reroll calculate winState;
+        var winState = this.state.win;
+        if(reRoll == 0)
+        {
+            var isAnswerExisted = this.checkPossibleValue(newNumberOfStars, this.state.usedNumbers);
+            winState = (isAnswerExisted ? null : false);
+        }
+
+        this.setState({
+            numberOfStars : newNumberOfStars,
+            reRoll: reRoll,
+            win : winState
+        });
+    },
     checkResult: function(){
         var numberOfStars = this.state.numberOfStars;
         var selectedNumbers = this.state.selectedNumbers;
@@ -153,7 +313,7 @@ var Game = React.createClass({
         for(var i = 0 ; i < selectedNumbers.length; i++){
             sum += selectedNumbers[i];
         }
- 
+
         var status = (sum == numberOfStars) ? true : false;
         // if it is correct add the numbers into the usedNumbers array
         if(status){
@@ -170,12 +330,19 @@ var Game = React.createClass({
             <div id="game">
                 <h2>Play Nine</h2>
                 <hr/>
+                <div>
+                    This is simple game implemented using React.js
+                    Choose a number or a sum of numbers which equal to the numbers of stars.
+                    You have 5 rerolls.
+                </div>
+                <br/>
                 <div className="clearfix">
                     <StarsFrame numberOfStars={this.state.numberOfStars} />
-                    <ButtonFrame selectNumbers={this.state.selectedNumbers} status={this.state.correct} checkResultClick={this.checkResult}/>
+                    <ButtonFrame selectNumbers={this.state.selectedNumbers} status={this.state.correct} checkResultClick={this.checkResult} redrawClick={this.redraw} reRollClick={this.reRollClick} reRollNumber={this.state.reRoll}/>
                     <AnswerFrame selectNumbers={this.state.selectedNumbers} unSelectNumberClick={this.unSelectNumber} />
                 </div>
                 <NumberFrame selectNumbers={this.state.selectedNumbers} usedNumbers={this.state.usedNumbers} selectNumberClick={this.selectNumber} />
+                <MessageFrame winState={this.state.win} resetClick={this.resetClick} />
             </div>
         );
     }
