@@ -153,7 +153,7 @@ var Game = React.createClass({displayName: "Game",
         for(var i = 0 ; i < selectedNumbers.length; i++){
             sum += selectedNumbers[i];
         }
-
+ 
         var status = (sum == numberOfStars) ? true : false;
         // if it is correct add the numbers into the usedNumbers array
         if(status){
